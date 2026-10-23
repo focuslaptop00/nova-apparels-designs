@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Meesho Product Review Hub - Harsh, Kiran, Anurag</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    .reply-branch { border-left: 2px dashed #cbd5e1; margin-left: 12px; padding-left: 12px; }
+  </style>
+</head>
+<body class="text-slate-800 pb-20">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-indigo-600 to-pink-500 flex items-center justify-center text-white font-extrabold text-xl shadow-md">
+          M
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            Meesho Review Hub
+            <span class="text-[11px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold border border-purple-200">Harsh • Kiran • Anurag</span>
+          </h1>
+          <p class="text-xs text-slate-500 hidden sm:block">40-50 Products Review & Multi-Partner Approval</p>
+        </div>
+      </div>
+
+      <!-- User Badge & Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Live Sync Pill -->
+        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Live Sync
+        </div>
+
+        <!-- Current User Badge -->
+        <button onclick="openNameModal()" id="userBadgeBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border transition text-xs sm:text-sm font-bold shadow-xs">
+          <i class="fa-solid fa-circle-user text-base"></i>
+          <span id="currentPartnerDisplay">Loading...</span>
+          <span class="text-[10px] text-slate-400 font-normal underline ml-1">Switch</span>
+        </button>
+
+        <!-- Bulk Upload -->
+        <button onclick="openUploadModal()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span class="hidden sm:inline">Bulk</span> Upload
+        </button>
+
+        <!-- WhatsApp Export -->
+        <button onclick="openWhatsAppModal()" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+          <i class="fa-brands fa-whatsapp text-sm sm:text-base"></i>
+          <span class="hidden sm:inline">WhatsApp</span> Report
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 mt-5">
+    
+    <!-- STATS & DUAL FILTERS (BY STATUS + BY PARTNER) -->
+    <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 mb-6 space-y-4">
+      
+      <!-- Top Row: Partner Filter & Search -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <!-- Partner Filter Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+          <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider mr-1"><i class="fa-solid fa-filter text-purple-600 mr-1"></i> Partner:</span>
+          <button onclick="setPartnerFilter('all')" data-pfilter="all" class="pfilter-btn active-pfilter px-3 py-1.5 rounded-xl font-bold text-xs transition bg-slate-900 text-white shadow-xs">
+            All 3 Partners
+          </button>
+          <button onclick="setPartnerFilter('Harsh')" data-pfilter="Harsh" class="pfilter-btn px-3 py-1.5 rounded-xl font-bold text-xs transition bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200">
+            🟣 Harsh's Votes
+          </button>
+          <button onclick="setPartnerFilter('Kiran')" data-pfilter="Kiran" class="pfilter-btn px-3 py-1.5 rounded-xl font-bold text-xs transition bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200">
+            🔵 Kiran's Votes
+          </button>
+          <button onclick="setPartnerFilter('Anurag')" data-pfilter="Anurag" class="pfilter-btn px-3 py-1.5 rounded-xl font-bold text-xs transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200">
+            🟢 Anurag's Votes
+          </button>
+        </div>
+
+        <!-- Search Box -->
+        <div class="relative w-full sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          <input type="text" id="searchInput" oninput="renderDesigns()" placeholder="Search design or remarks..." class="w-full pl-8 pr-3 py-1.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition">
+        </div>
+      </div>
+
+      <!-- Bottom Row: Decision/Status Filter Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="statusFilterTabs">
+        <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider mr-1">Status:</span>
+        <button onclick="setStatusFilter('all')" data-sfilter="all" class="sfilter-btn px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 bg-slate-900 text-white">
+          All <span id="count-all" class="bg-white/20 px-1.5 py-0.2 rounded-md text-[11px]">0</span>
+        </button>
+        <button onclick="setStatusFilter('approved')" data-sfilter="approved" class="sfilter-btn px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 bg-slate-100 hover:bg-emerald-100 text-emerald-800">
+          ✅ Approved <span id="count-approved" class="bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded-md text-[11px]">0</span>
+        </button>
+        <button onclick="setStatusFilter('rejected')" data-sfilter="rejected" class="sfilter-btn px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 bg-slate-100 hover:bg-rose-100 text-rose-800">
+          ❌ Rejected <span id="count-rejected" class="bg-rose-200 text-rose-900 px-1.5 py-0.2 rounded-md text-[11px]">0</span>
+        </button>
+        <button onclick="setStatusFilter('complaint')" data-sfilter="complaint" class="sfilter-btn px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 bg-slate-100 hover:bg-amber-100 text-amber-800">
+          ⚠️ Complainted / Problem <span id="count-complaint" class="bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded-md text-[11px]">0</span>
+        </button>
+        <button onclick="setStatusFilter('pending')" data-sfilter="pending" class="sfilter-btn px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700">
+          ⏳ Pending <span id="count-pending" class="bg-slate-200 px-1.5 py-0.2 rounded-md text-[11px]">0</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="emptyState" class="hidden bg-white rounded-3xl p-12 text-center border-2 border-dashed border-slate-200 max-w-lg mx-auto mt-10">
+      <div class="w-16 h-16 mx-auto mb-4 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-2xl">
+        <i class="fa-solid fa-images"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-800 mb-1">Ajj koi product designs nahi han</h3>
+      <p class="text-sm text-slate-500 mb-6">Apne 40-50 Meesho product photos upload karo te teeno partners review start karo.</p>
+      <button onclick="openUploadModal()" class="px-5 py-2.5 bg-purple-600 text-white font-bold rounded-xl shadow-md hover:bg-purple-700 transition inline-flex items-center gap-2">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        Bulk Upload Photos
+      </button>
+    </div>
+
+    <!-- DESIGNS GRID -->
+    <div id="designsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Cards dynamically inserted -->
+    </div>
+  </main>
+
+  <!-- STRICT 3-PARTNER NAME MODAL (ONLY HARSH, KIRAN, ANURAG) -->
+  <div id="nameModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-purple-100 text-purple-700 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-inner">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900">Swagat Hai! Tusi Kaun Ho?</h2>
+        <p class="text-xs text-slate-500 mt-1">Sirf 1st time apne naam te click karo. Is device te apne aap yaad rakhega!</p>
+      </div>
+
+      <div class="space-y-3 mb-2">
+        <!-- Harsh Button -->
+        <button onclick="choosePartner('Harsh')" class="w-full text-left p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-600 bg-purple-50/50 hover:bg-purple-100/70 transition flex items-center justify-between group">
+          <div class="flex items-center gap-3.5">
+            <span class="w-11 h-11 rounded-xl bg-purple-600 text-white flex items-center justify-center font-extrabold text-base shadow-sm">H</span>
+            <div>
+              <p class="font-extrabold text-slate-900 group-hover:text-purple-900 text-base">Harsh</p>
+              <p class="text-xs text-purple-700 font-medium">Partner 1</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-circle-arrow-right text-purple-400 group-hover:text-purple-700 text-xl transition"></i>
+        </button>
+
+        <!-- Kiran Button -->
+        <button onclick="choosePartner('Kiran')" class="w-full text-left p-4 rounded-2xl border-2 border-blue-200 hover:border-blue-600 bg-blue-50/50 hover:bg-blue-100/70 transition flex items-center justify-between group">
+          <div class="flex items-center gap-3.5">
+            <span class="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center font-extrabold text-base shadow-sm">K</span>
+            <div>
+              <p class="font-extrabold text-slate-900 group-hover:text-blue-900 text-base">Kiran</p>
+              <p class="text-xs text-blue-700 font-medium">Partner 2</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-circle-arrow-right text-blue-400 group-hover:text-blue-700 text-xl transition"></i>
+        </button>
+
+        <!-- Anurag Button -->
+        <button onclick="choosePartner('Anurag')" class="w-full text-left p-4 rounded-2xl border-2 border-emerald-200 hover:border-emerald-600 bg-emerald-50/50 hover:bg-emerald-100/70 transition flex items-center justify-between group">
+          <div class="flex items-center gap-3.5">
+            <span class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-base shadow-sm">A</span>
+            <div>
+              <p class="font-extrabold text-slate-900 group-hover:text-emerald-900 text-base">Anurag</p>
+              <p class="text-xs text-emerald-700 font-medium">Partner 3</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-circle-arrow-right text-emerald-400 group-hover:text-emerald-700 text-xl transition"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE ZOOM MODAL -->
+  <div id="imageModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm hidden flex items-center justify-center p-4" onclick="closeImageModal()">
+    <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
+      <button onclick="closeImageModal()" class="absolute -top-12 right-0 text-white/80 hover:text-white text-2xl p-2">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img id="zoomImage" src="" class="max-w-full max-h-[82vh] rounded-xl object-contain shadow-2xl">
+      <p id="zoomTitle" class="text-white text-sm font-semibold mt-3 text-center"></p>
+    </div>
+  </div>
+
+  <!-- BULK UPLOAD MODAL -->
+  <div id="uploadModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i>
+          Bulk Upload 40-50 Meesho Photos
+        </h2>
+        <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-purple-300 hover:border-purple-500 bg-purple-50/50 hover:bg-purple-50 rounded-2xl p-8 text-center cursor-pointer transition">
+        <input type="file" id="fileInput" multiple accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+        <i class="fa-solid fa-images text-4xl text-purple-500 mb-2"></i>
+        <p class="font-bold text-slate-800 text-sm">Click karo ya photos drop karo</p>
+        <p class="text-xs text-slate-500 mt-1">Ek saath 40 to 50 JPG/PNG images select kar sakde ho</p>
+      </div>
+
+      <div id="selectedFilesInfo" class="mt-4 text-xs font-bold text-purple-700 hidden"></div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button onclick="closeUploadModal()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-semibold">Cancel</button>
+        <button id="uploadSubmitBtn" onclick="startBulkUpload()" disabled class="px-5 py-2 bg-purple-600 disabled:opacity-50 hover:bg-purple-700 text-white rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+          <span>Upload Designs</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHATSAPP SUMMARY MODAL -->
+  <div id="whatsappModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-brands fa-whatsapp text-emerald-600 text-2xl"></i>
+          <h2 class="text-lg font-extrabold text-slate-900">WhatsApp Summary Report</h2>
+        </div>
+        <button onclick="closeWhatsAppModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">Harsh, Kiran aur Anurag da final review WhatsApp group te bhejo:</p>
+
+      <textarea id="whatsappText" rows="12" readonly class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-2xl p-3 focus:outline-none"></textarea>
+
+      <div class="mt-4 flex justify-between items-center">
+        <span id="copiedToast" class="text-xs text-emerald-600 font-bold opacity-0 transition-opacity">✅ Copied to clipboard!</span>
+        <button onclick="copyWhatsAppSummary()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow transition flex items-center gap-2">
+          <i class="fa-regular fa-copy"></i>
+          Copy for WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const VALID_PARTNERS = ["Harsh", "Kiran", "Anurag"];
+    let currentPartner = localStorage.getItem('meesho_partner_v2') || '';
+    let designs = [];
+    let currentPartnerFilter = 'all'; // 'all', 'Harsh', 'Kiran', 'Anurag'
+    let currentStatusFilter = 'all';  // 'all', 'approved', 'rejected', 'complaint', 'pending'
+    let selectedFiles = [];
+    let replyingToCommentId = null;
+
+    // Check Device on Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!currentPartner || !VALID_PARTNERS.includes(currentPartner)) {
+        // New device or not yet selected -> ask who they are
+        openNameModal();
+      } else {
+        // Same device -> auto-access!
+        updatePartnerUI();
+      }
+      fetchDesigns();
+      // Auto background polling every 4s
+      setInterval(fetchDesigns, 4000);
+    });
+
+    function updatePartnerUI() {
+      const display = document.getElementById('currentPartnerDisplay');
+      const badgeBtn = document.getElementById('userBadgeBtn');
+      if (currentPartner) {
+        display.innerText = currentPartner;
+        if (currentPartner === 'Harsh') {
+          badgeBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-300 bg-purple-50 text-purple-800 transition text-xs sm:text-sm font-bold shadow-xs";
+        } else if (currentPartner === 'Kiran') {
+          badgeBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-300 bg-blue-50 text-blue-800 transition text-xs sm:text-sm font-bold shadow-xs";
+        } else if (currentPartner === 'Anurag') {
+          badgeBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 transition text-xs sm:text-sm font-bold shadow-xs";
+        }
+      } else {
+        display.innerText = "Select Partner";
+      }
+    }
+
+    function openNameModal() {
+      document.getElementById('nameModal').classList.remove('hidden');
+    }
+    function closeNameModal() {
+      document.getElementById('nameModal').classList.add('hidden');
+    }
+
+    function choosePartner(name) {
+      if (!VALID_PARTNERS.includes(name)) return;
+      currentPartner = name;
+      localStorage.setItem('meesho_partner_v2', name);
+      updatePartnerUI();
+      closeNameModal();
+      renderDesigns();
+    }
+
+    // API calls
+    async function fetchDesigns() {
+      try {
+        const res = await fetch('/api/designs');
+        const data = await res.json();
+        designs = data.designs || [];
+        updateCounts();
+        renderDesigns();
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+    }
+
+    function getDesignStatusForFilter(d) {
+      if (currentPartnerFilter === 'all') {
+        // If all 3 approved -> approved
+        // If any rejected -> rejected
+        // If any complaint -> complaint
+        const revs = Object.values(d.partner_reviews || {});
+        if (revs.includes('rejected')) return 'rejected';
+        if (revs.includes('complaint')) return 'complaint';
+        if (revs.length === 3 && revs.every(r => r === 'approved')) return 'approved';
+        return 'pending';
+      } else {
+        return (d.partner_reviews && d.partner_reviews[currentPartnerFilter]) || 'pending';
+      }
+    }
+
+    function updateCounts() {
+      const counts = { all: designs.length, approved: 0, rejected: 0, complaint: 0, pending: 0 };
+      designs.forEach(d => {
+        const s = getDesignStatusForFilter(d);
+        if (counts[s] !== undefined) counts[s]++;
+      });
+      document.getElementById('count-all').innerText = counts.all;
+      document.getElementById('count-approved').innerText = counts.approved;
+      document.getElementById('count-rejected').innerText = counts.rejected;
+      document.getElementById('count-complaint').innerText = counts.complaint;
+      document.getElementById('count-pending').innerText = counts.pending;
+    }
+
+    function setPartnerFilter(partner) {
+      currentPartnerFilter = partner;
+      document.querySelectorAll('.pfilter-btn').forEach(btn => {
+        if (btn.getAttribute('data-pfilter') === partner) {
+          btn.classList.add('bg-slate-900', 'text-white');
+          btn.classList.remove('text-purple-700', 'text-blue-700', 'text-emerald-700', 'bg-purple-50', 'bg-blue-50', 'bg-emerald-50');
+        } else {
+          btn.classList.remove('bg-slate-900', 'text-white');
+          const p = btn.getAttribute('data-pfilter');
+          if (p === 'Harsh') btn.classList.add('bg-purple-50', 'text-purple-700');
+          if (p === 'Kiran') btn.classList.add('bg-blue-50', 'text-blue-700');
+          if (p === 'Anurag') btn.classList.add('bg-emerald-50', 'text-emerald-700');
+          if (p === 'all') btn.classList.add('bg-slate-100', 'text-slate-700');
+        }
+      });
+      updateCounts();
+      renderDesigns();
+    }
+
+    function setStatusFilter(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.sfilter-btn').forEach(btn => {
+        if (btn.getAttribute('data-sfilter') === status) {
+          btn.classList.add('bg-slate-900', 'text-white');
+          btn.classList.remove('bg-slate-100', 'text-emerald-800', 'text-rose-800', 'text-amber-800', 'text-slate-700');
+        } else {
+          btn.classList.remove('bg-slate-900', 'text-white');
+          btn.classList.add('bg-slate-100');
+          const s = btn.getAttribute('data-sfilter');
+          if (s === 'approved') btn.classList.add('text-emerald-800');
+          else if (s === 'rejected') btn.classList.add('text-rose-800');
+          else if (s === 'complaint') btn.classList.add('text-amber-800');
+          else btn.classList.add('text-slate-700');
+        }
+      });
+      renderDesigns();
+    }
+
+    function getPartnerTheme(name) {
+      if (name === 'Harsh') return { border: 'border-purple-300', bg: 'bg-purple-50', text: 'text-purple-800', badge: 'bg-purple-100 text-purple-800 border-purple-200' };
+      if (name === 'Kiran') return { border: 'border-blue-300', bg: 'bg-blue-50', text: 'text-blue-800', badge: 'bg-blue-100 text-blue-800 border-blue-200' };
+      if (name === 'Anurag') return { border: 'border-emerald-300', bg: 'bg-emerald-50', text: 'text-emerald-800', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+      return { border: 'border-slate-300', bg: 'bg-slate-50', text: 'text-slate-800', badge: 'bg-slate-100 text-slate-800 border-slate-200' };
+    }
+
+    function renderPartnerBadgePill(partnerName, status) {
+      let icon = '<i class="fa-regular fa-clock text-slate-400"></i>';
+      let bg = 'bg-slate-100 text-slate-500 border-slate-200';
+      let label = 'Pending';
+
+      if (status === 'approved') {
+        icon = '<i class="fa-solid fa-check text-emerald-600"></i>';
+        bg = 'bg-emerald-50 text-emerald-800 border-emerald-300 font-bold';
+        label = 'Approved';
+      } else if (status === 'rejected') {
+        icon = '<i class="fa-solid fa-xmark text-rose-600"></i>';
+        bg = 'bg-rose-50 text-rose-800 border-rose-300 font-bold';
+        label = 'Rejected';
+      } else if (status === 'complaint') {
+        icon = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i>';
+        bg = 'bg-amber-50 text-amber-800 border-amber-300 font-bold';
+        label = 'Complaint';
+      }
+
+      return `
+        <div class="flex items-center justify-between px-2.5 py-1 rounded-xl border text-[11px] ${bg}">
+          <span class="font-extrabold flex items-center gap-1.5">${partnerName}:</span>
+          <span class="flex items-center gap-1">${icon} ${label}</span>
+        </div>
+      `;
+    }
+
+    function renderDesigns() {
+      const container = document.getElementById('designsGrid');
+      const emptyState = document.getElementById('emptyState');
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      let filtered = designs.filter(d => {
+        const itemStatus = getDesignStatusForFilter(d);
+        if (currentStatusFilter !== 'all' && itemStatus !== currentStatusFilter) return false;
+
+        if (query) {
+          const matchTitle = d.title.toLowerCase().includes(query);
+          const matchComments = d.comments.some(c => c.text.toLowerCase().includes(query) || c.author.toLowerCase().includes(query));
+          return matchTitle || matchComments;
+        }
+        return true;
+      });
+
+      if (designs.length === 0) {
+        emptyState.classList.remove('hidden');
+        container.innerHTML = '';
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      container.innerHTML = filtered.map(d => {
+        const myDecision = (d.partner_reviews && d.partner_reviews[currentPartner]) || 'pending';
+
+        // Comments HTML
+        const commentsHtml = (d.comments || []).map(c => {
+          const theme = getPartnerTheme(c.author);
+          const repliesHtml = (c.replies || []).map(r => `
+            <div class="mt-2 bg-white rounded-xl p-2.5 border border-slate-200 shadow-2xs">
+              <div class="flex items-center justify-between mb-1">
+                <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${getPartnerTheme(r.author).badge}">${escapeHtml(r.author)}</span>
+                <span class="text-[10px] text-slate-400">${formatTime(r.created_at)}</span>
+              </div>
+              <p class="text-xs text-slate-700 leading-snug">${escapeHtml(r.text)}</p>
+            </div>
+          `).join('');
+
+          const isReplying = replyingToCommentId === c.id;
+
+          return `
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+              <div class="flex items-center justify-between mb-1">
+                <span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold border ${theme.badge}">${escapeHtml(c.author)}</span>
+                <span class="text-[10px] text-slate-400">${formatTime(c.created_at)}</span>
+              </div>
+              <p class="text-xs text-slate-800 font-medium leading-relaxed mt-1">${escapeHtml(c.text)}</p>
+              
+              <div class="mt-2 flex items-center justify-between">
+                <button onclick="toggleReplyBox(${c.id})" class="text-[11px] font-bold text-purple-700 hover:text-purple-900 flex items-center gap-1">
+                  <i class="fa-solid fa-reply text-[10px]"></i> Reply
+                </button>
+              </div>
+
+              ${repliesHtml ? `<div class="reply-branch mt-2 space-y-1.5">${repliesHtml}</div>` : ''}
+
+              ${isReplying ? `
+                <div class="mt-2.5 reply-branch">
+                  <div class="flex gap-1.5">
+                    <input type="text" id="replyInput-${c.id}" placeholder="Reply to ${escapeHtml(c.author)} as ${currentPartner}..." class="flex-1 px-2.5 py-1 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-purple-500 bg-white" onkeydown="if(event.key==='Enter') submitReply(${c.id})">
+                    <button onclick="submitReply(${c.id})" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold">Send</button>
+                    <button onclick="toggleReplyBox(null)" class="px-2 py-1 text-slate-400 hover:text-slate-600 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-md transition flex flex-col justify-between">
+            
+            <!-- IMAGE TOP -->
+            <div class="relative bg-slate-100 group cursor-pointer aspect-4/3 overflow-hidden flex items-center justify-center" onclick="openImageModal('/uploads/${d.filename}', '${escapeHtml(d.title)}')">
+              <img src="/uploads/${d.filename}" alt="${escapeHtml(d.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+              
+              <div class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="px-3 py-1.5 bg-black/75 text-white rounded-full text-xs font-bold backdrop-blur-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i> Tap to Zoom
+                </span>
+              </div>
+
+              <!-- Delete Button -->
+              <button onclick="event.stopPropagation(); deleteDesign(${d.id})" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-rose-50 hover:text-rose-600 text-slate-400 shadow flex items-center justify-center text-xs transition" title="Delete Design">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+
+            <!-- BODY CONTENT -->
+            <div class="p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-3">
+                  <h3 class="font-bold text-slate-900 text-sm line-clamp-1">${escapeHtml(d.title)}</h3>
+                  <span class="text-xs font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200">#${d.id}</span>
+                </div>
+
+                <!-- 3 PARTNER STATUS PILLS (SIDE-BY-SIDE) -->
+                <div class="bg-slate-50/80 p-2.5 rounded-2xl border border-slate-200 space-y-1.5 mb-4">
+                  <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Partner Votes:</p>
+                  ${renderPartnerBadgePill('Harsh', d.partner_reviews ? d.partner_reviews['Harsh'] : 'pending')}
+                  ${renderPartnerBadgePill('Kiran', d.partner_reviews ? d.partner_reviews['Kiran'] : 'pending')}
+                  ${renderPartnerBadgePill('Anurag', d.partner_reviews ? d.partner_reviews['Anurag'] : 'pending')}
+                </div>
+
+                <!-- YOUR DECISION ACTION BUTTONS -->
+                <div class="mb-4 bg-purple-50/50 p-2.5 rounded-2xl border border-purple-100">
+                  <p class="text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
+                    <span>Your Vote as <strong>${currentPartner || 'Partner'}</strong>:</span>
+                    <span class="text-[10px] text-purple-700 font-semibold">${myDecision.toUpperCase()}</span>
+                  </p>
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <button onclick="castVote(${d.id}, 'approved')" class="py-2 rounded-xl text-xs font-extrabold transition flex flex-col items-center gap-1 border ${myDecision === 'approved' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border-slate-200'}">
+                      <i class="fa-solid fa-circle-check text-sm"></i>
+                      <span>Approve</span>
+                    </button>
+                    <button onclick="castVote(${d.id}, 'rejected')" class="py-2 rounded-xl text-xs font-extrabold transition flex flex-col items-center gap-1 border ${myDecision === 'rejected' ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border-slate-200'}">
+                      <i class="fa-solid fa-circle-xmark text-sm"></i>
+                      <span>Reject</span>
+                    </button>
+                    <button onclick="castVote(${d.id}, 'complaint')" class="py-2 rounded-xl text-xs font-extrabold transition flex flex-col items-center gap-1 border ${myDecision === 'complaint' ? 'bg-amber-500 text-white border-amber-500 shadow-sm' : 'bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-700 border-slate-200'}">
+                      <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                      <span>Complaint</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- DISCUSSION & COMMENTS -->
+                <div class="border-t border-slate-100 pt-3">
+                  <div class="flex items-center justify-between text-xs font-extrabold text-slate-700 mb-2">
+                    <span><i class="fa-regular fa-comments text-purple-600 mr-1"></i> Discussion (${d.comments.length})</span>
+                  </div>
+
+                  <div class="space-y-2 mb-3 max-h-56 overflow-y-auto pr-1">
+                    ${commentsHtml || '<p class="text-xs text-slate-400 italic py-1">Koi problem ya suggestion hai ta niche likho...</p>'}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ADD COMMENT INPUT WITH QUICK ISSUE CHIPS -->
+              <div class="mt-2 pt-2 border-t border-slate-100">
+                <div class="flex flex-wrap gap-1 mb-2">
+                  <button onclick="fillQuickComment(${d.id}, 'Fabric Quality patla hai')" class="text-[10px] bg-slate-100 hover:bg-purple-100 text-slate-600 hover:text-purple-700 px-2 py-0.5 rounded-md font-semibold transition">Fabric Issue</button>
+                  <button onclick="fillQuickComment(${d.id}, 'Print / Color blur hai')" class="text-[10px] bg-slate-100 hover:bg-purple-100 text-slate-600 hover:text-purple-700 px-2 py-0.5 rounded-md font-semibold transition">Color Blur</button>
+                  <button onclick="fillQuickComment(${d.id}, 'Price / Cost zyada lag reha')" class="text-[10px] bg-slate-100 hover:bg-purple-100 text-slate-600 hover:text-purple-700 px-2 py-0.5 rounded-md font-semibold transition">Price High</button>
+                  <button onclick="fillQuickComment(${d.id}, 'Design bohot wadiya hai, done karo!')" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md font-semibold transition">Looks Good</button>
+                </div>
+
+                <div class="flex gap-1.5">
+                  <input type="text" id="commentInput-${d.id}" placeholder="Write comment as ${currentPartner}..." class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 focus:bg-white transition" onkeydown="if(event.key==='Enter') submitComment(${d.id})">
+                  <button onclick="submitComment(${d.id})" class="px-3.5 py-1.5 bg-slate-900 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Cast Vote (Approve / Reject / Complaint)
+    async function castVote(designId, status) {
+      if (!currentPartner) {
+        openNameModal();
+        return;
+      }
+      try {
+        await fetch(`/api/designs/${designId}/partner-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ partner: currentPartner, status: status })
+        });
+        fetchDesigns();
+      } catch (err) {
+        alert('Error saving status');
+      }
+    }
+
+    // Comments & Replies
+    function fillQuickComment(designId, text) {
+      const input = document.getElementById(`commentInput-${designId}`);
+      if (input) {
+        input.value = text;
+        input.focus();
+      }
+    }
+
+    async function submitComment(designId) {
+      if (!currentPartner) {
+        openNameModal();
+        return;
+      }
+      const input = document.getElementById(`commentInput-${designId}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      try {
+        await fetch(`/api/designs/${designId}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ author: currentPartner, text: text })
+        });
+        input.value = '';
+        fetchDesigns();
+      } catch (err) {
+        alert('Error posting comment');
+      }
+    }
+
+    function toggleReplyBox(commentId) {
+      replyingToCommentId = replyingToCommentId === commentId ? null : commentId;
+      renderDesigns();
+      if (replyingToCommentId) {
+        setTimeout(() => {
+          const el = document.getElementById(`replyInput-${commentId}`);
+          if (el) el.focus();
+        }, 50);
+      }
+    }
+
+    async function submitReply(commentId) {
+      if (!currentPartner) {
+        openNameModal();
+        return;
+      }
+      const input = document.getElementById(`replyInput-${commentId}`);
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+
+      try {
+        await fetch(`/api/comments/${commentId}/reply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ author: currentPartner, text: text })
+        });
+        replyingToCommentId = null;
+        fetchDesigns();
+      } catch (err) {
+        alert('Error posting reply');
+      }
+    }
+
+    async function deleteDesign(designId) {
+      if (!confirm('Are you sure you want to remove this design?')) return;
+      try {
+        await fetch(`/api/designs/${designId}/delete`, { method: 'POST' });
+        fetchDesigns();
+      } catch (err) {
+        alert('Error deleting design');
+      }
+    }
+
+    // Bulk Upload
+    function openUploadModal() {
+      document.getElementById('uploadModal').classList.remove('hidden');
+    }
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.add('hidden');
+      selectedFiles = [];
+      document.getElementById('selectedFilesInfo').classList.add('hidden');
+      document.getElementById('uploadSubmitBtn').disabled = true;
+    }
+
+    function handleFileSelect(event) {
+      selectedFiles = Array.from(event.target.files);
+      const info = document.getElementById('selectedFilesInfo');
+      const submitBtn = document.getElementById('uploadSubmitBtn');
+      if (selectedFiles.length > 0) {
+        info.innerText = `Selected ${selectedFiles.length} photos ready to upload`;
+        info.classList.remove('hidden');
+        submitBtn.disabled = false;
+      } else {
+        info.classList.add('hidden');
+        submitBtn.disabled = true;
+      }
+    }
+
+    async function startBulkUpload() {
+      if (selectedFiles.length === 0) return;
+      const submitBtn = document.getElementById('uploadSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Uploading...`;
+
+      const formData = new FormData();
+      for (const file of selectedFiles) {
+        formData.append('files', file);
+      }
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeUploadModal();
+          fetchDesigns();
+        } else {
+          alert('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Error uploading images');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Upload Designs</span>`;
+      }
+    }
+
+    // WhatsApp Summary Generator
+    function openWhatsAppModal() {
+      const modal = document.getElementById('whatsappModal');
+      const textarea = document.getElementById('whatsappText');
+
+      let allApproved = [];
+      let rejectedList = [];
+      let complaintList = [];
+      let pendingList = [];
+
+      designs.forEach(d => {
+        const pr = d.partner_reviews || {};
+        const isHarshApp = pr['Harsh'] === 'approved';
+        const isKiranApp = pr['Kiran'] === 'approved';
+        const isAnuragApp = pr['Anurag'] === 'approved';
+
+        // Check rejects
+        let rejects = [];
+        if (pr['Harsh'] === 'rejected') rejects.push('Harsh');
+        if (pr['Kiran'] === 'rejected') rejects.push('Kiran');
+        if (pr['Anurag'] === 'rejected') rejects.push('Anurag');
+
+        // Check complaints
+        let complaints = [];
+        if (pr['Harsh'] === 'complaint') complaints.push('Harsh');
+        if (pr['Kiran'] === 'complaint') complaints.push('Kiran');
+        if (pr['Anurag'] === 'complaint') complaints.push('Anurag');
+
+        if (rejects.length > 0) {
+          let lastComment = d.comments.length > 0 ? `("${d.comments[d.comments.length - 1].text}")` : '';
+          rejectedList.push(`• #${d.id} ${d.title} - Rejected by [${rejects.join(', ')}] ${lastComment}`);
+        } else if (complaints.length > 0) {
+          let lastComment = d.comments.length > 0 ? `("${d.comments[d.comments.length - 1].text}")` : '';
+          complaintList.push(`• #${d.id} ${d.title} - Complaint by [${complaints.join(', ')}] ${lastComment}`);
+        } else if (isHarshApp && isKiranApp && isAnuragApp) {
+          allApproved.push(`• #${d.id} ${d.title}`);
+        } else {
+          pendingList.push(`• #${d.id} ${d.title}`);
+        }
+      });
+
+      let text = `📦 *MEESHO DESIGNS FINAL DECISION REPORT*\n`;
+      text += `📅 Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+      text += `👥 Partners: Harsh • Kiran • Anurag\n`;
+      text += `--------------------------------------\n`;
+      text += `📊 *OVERVIEW:*\n`;
+      text += `• Total Designs: ${designs.length}\n`;
+      text += `✅ Approved by All 3: ${allApproved.length}\n`;
+      text += `❌ Rejected / Cancel: ${rejectedList.length}\n`;
+      text += `⚠️ Complaints / Fixes: ${complaintList.length}\n`;
+      text += `⏳ Pending Review: ${pendingList.length}\n`;
+      text += `--------------------------------------\n\n`;
+
+      if (allApproved.length > 0) {
+        text += `✅ *APPROVED BY ALL 3 (${allApproved.length}):*\n`;
+        text += allApproved.join('\n') + `\n\n`;
+      }
+
+      if (rejectedList.length > 0) {
+        text += `❌ *REJECTED / CANCELLED (${rejectedList.length}):*\n`;
+        text += rejectedList.join('\n') + `\n\n`;
+      }
+
+      if (complaintList.length > 0) {
+        text += `⚠️ *COMPLAINTS / REVIEW NEEDED (${complaintList.length}):*\n`;
+        text += complaintList.join('\n') + `\n\n`;
+      }
+
+      textarea.value = text;
+      modal.classList.remove('hidden');
+    }
+
+    function closeWhatsAppModal() {
+      document.getElementById('whatsappModal').classList.add('hidden');
+    }
+
+    function copyWhatsAppSummary() {
+      const textarea = document.getElementById('whatsappText');
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value);
+      const toast = document.getElementById('copiedToast');
+      toast.classList.remove('opacity-0');
+      setTimeout(() => toast.classList.add('opacity-0'), 2500);
+    }
+
+    // Zoom Modal
+    function openImageModal(src, title) {
+      document.getElementById('zoomImage').src = src;
+      document.getElementById('zoomTitle').innerText = title;
+      document.getElementById('imageModal').classList.remove('hidden');
+    }
+    function closeImageModal() {
+      document.getElementById('imageModal').classList.add('hidden');
+    }
+
+    // Escape HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      const d = new Date(timestamp);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  </script>
+</body>
+</html>
