@@ -9,11 +9,12 @@ import sys
 import json
 import sqlite3
 import mimetypes
-import cgi
 import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 from datetime import datetime
+from email.parser import BytesParser
+from email.policy import default
 
 PORT = int(os.environ.get("PORT", 8080))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -195,49 +196,35 @@ class MeeshoReviewHandler(BaseHTTPRequestHandler):
                 return
 
             try:
-                content_len = self.headers.get('Content-Length')
-                environ = {
-                    'REQUEST_METHOD': 'POST',
-                    'CONTENT_TYPE': content_type,
-                }
-                if content_len:
-                    environ['CONTENT_LENGTH'] = content_len
+                content_len = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_len) if content_len > 0 else b''
 
-                form = cgi.FieldStorage(
-                    fp=self.rfile,
-                    headers=self.headers,
-                    environ=environ
-                )
-
-                if 'files' not in form:
-                    self.send_json({"error": "No files provided"}, 400)
-                    return
-
-                file_fields = form['files']
-                if not isinstance(file_fields, list):
-                    file_fields = [file_fields]
+                raw_msg = f"Content-Type: {content_type}\r\n\r\n".encode("utf-8") + post_data
+                msg = BytesParser(policy=default).parsebytes(raw_msg)
 
                 saved_count = 0
                 conn = self.get_db()
                 cursor = conn.cursor()
 
-                for item in file_fields:
-                    if item.filename:
-                        orig_filename = item.filename
+                for part in msg.iter_parts():
+                    orig_filename = part.get_filename()
+                    if orig_filename:
                         clean_name = re.sub(r'[^a-zA-Z0-9_\.-]', '_', orig_filename)
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
                         stored_filename = f"{timestamp}_{clean_name}"
                         dest_path = os.path.join(UPLOADS_DIR, stored_filename)
 
-                        with open(dest_path, "wb") as f:
-                            f.write(item.file.read())
+                        file_bytes = part.get_payload(decode=True)
+                        if file_bytes:
+                            with open(dest_path, "wb") as f:
+                                f.write(file_bytes)
 
-                        title = os.path.splitext(orig_filename)[0].replace('_', ' ').replace('-', ' ').title()
-                        cursor.execute(
-                            "INSERT INTO designs (title, filename, status) VALUES (?, ?, 'pending')",
-                            (title, stored_filename)
-                        )
-                        saved_count += 1
+                            title = os.path.splitext(orig_filename)[0].replace('_', ' ').replace('-', ' ').title()
+                            cursor.execute(
+                                "INSERT INTO designs (title, filename, status) VALUES (?, ?, 'pending')",
+                                (title, stored_filename)
+                            )
+                            saved_count += 1
 
                 conn.commit()
                 conn.close()
